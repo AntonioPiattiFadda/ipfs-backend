@@ -5,50 +5,65 @@ const { createReadStream } = require('fs');
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
 const express = require('express');
+const cors = require('cors');
 
-// const JWT = process.env.PINATA_JWT;
 const app = express();
+
+const corsOptions = {
+  origin: 'http://localhost:3001',
+};
+const JWT = process.env.PINATA_JWT;
+
+app.use(cors(corsOptions));
 
 app.post('/upload', upload.single('file'), async (req, res) => {
   try {
+    const allowedExtensions = ['png', 'jpg', 'jpeg', 'mp3', 'mp4'];
+    const extension = req.file.originalname.split('.').pop();
+    const name = req.file.originalname.split('.').shift();
+
+    if (!allowedExtensions.includes(extension)) {
+      return res
+        .status(400)
+        .send('El formato soportado de archivo es PNG, JPG, JPEG, MP3 o MP4');
+    }
     if (!req.file) {
       return res.status(400).send('No se ha proporcionado ningún archivo');
     }
-    console.log(req.file);
 
     const formData = new FormData();
 
-    // //Quiero ahora que la API guarde un archivo de video en IPFS
-    // const file = createReadStream('./assets/Super-Mario-Bros.mp4');
-    // formData.append('file', file);
+    const file = createReadStream(req.file.path);
+    formData.append('file', file);
 
-    // const pinataMetadata = JSON.stringify({
-    //   name: 'MP4 File',
-    // });
-    // formData.append('pinataMetadata', pinataMetadata);
+    const pinataMetadata = JSON.stringify({
+      name,
+    });
+    formData.append('pinataMetadata', pinataMetadata);
 
-    // const pinataOptions = JSON.stringify({
-    //   cidVersion: 1,
-    // });
-    // formData.append('pinataOptions', pinataOptions);
+    const pinataOptions = JSON.stringify({
+      cidVersion: 1,
+    });
+    formData.append('pinataOptions', pinataOptions);
 
-    // const res = await Axios.post(
-    //   'https://api.pinata.cloud/pinning/pinFileToIPFS',
-    //   formData,
-    //   {
-    //     headers: {
-    //       Authorization: `Bearer ${JWT}`,
-    //       ...formData.getHeaders(),
-    //     },
-    //   }
-    // );
-    // const ipfsHash = res.data.IpfsHash;
-    // console.log(res.data);
+    const response = await Axios.post(
+      'https://api.pinata.cloud/pinning/pinFileToIPFS',
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${JWT}`,
+          ...formData.getHeaders(),
+        },
+      }
+    );
+    const ipfsHash = response.data.IpfsHash;
 
-    // //LLegaria al cliente
+    //NOTE - Subir el hash a blockchain
+    //NOTE - Hacer hash con datos del archivo para la app
+    console.log('IPFS Hash:', ipfsHash);
+
     res.json({
       message: 'Archivo subido a IPFS con éxito',
-      // ipfsHash,
     });
   } catch (error) {
     console.error('Error:', error);

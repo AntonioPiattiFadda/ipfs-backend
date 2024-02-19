@@ -1,27 +1,38 @@
-import fetch from 'node-fetch'; // Importar node-fetch para usar en Node.js
+import fetch from 'node-fetch';
 import { writeFileSync } from 'fs';
 
-const IpfsHash = 'bafkreihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku';
+const IpfsHash = 'bafkreibkfqh42lpnos2uf7zioxzfryaovcohtrw4eq4puh2nnuiuh7y5ma';
 
 async function main() {
   try {
     const res = await fetch(`https://gateway.pinata.cloud/ipfs/${IpfsHash}`);
     const contentType = res.headers.get('content-type');
-    console.log('Content-Type:', contentType);
 
     if (!res.ok) {
       throw new Error(
         `Failed to fetch IPFS file: ${res.status} ${res.statusText}`
       );
     }
+    console.log('Content-Type:', contentType);
 
-    const fileData = await res.arrayBuffer(); // Obtener los datos del archivo como un ArrayBuffer
-    const buffer = Buffer.from(fileData); // Convertir el ArrayBuffer a un Buffer de Node.js
+    const fileData = await res.arrayBuffer();
+    const buffer = Buffer.from(fileData);
 
-    // Guardar el archivo en local
-    writeFileSync('archivo.mp3', buffer);
+    let archiveName = '';
+    const fileExt = contentType.split('/').pop();
+    const extensionMapping = {
+      mp4: 'mp4',
+      mpeg: 'mp3',
+      jpg: 'jpg',
+      jpeg: 'jpg',
+      png: 'png',
+    };
 
-    console.log('Archivo MP3 descargado y guardado con éxito.');
+    archiveName = extensionMapping[fileExt] || 'unknown';
+
+    writeFileSync(`Archivo.${archiveName}`, buffer);
+
+    console.log(`Archivo ${archiveName} descargado y guardado con éxito.`);
   } catch (error) {
     console.log('Error:', error);
   }
