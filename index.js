@@ -13,6 +13,11 @@ const app = express();
 const corsOptions = {
   origin: '*',
 };
+if (!process.env.PINATA_JWT) {
+  console.error('Error: PINATA_JWT environment variable is not set.');
+  process.exit(1); // Exit the application if the variable is not set
+}
+
 const JWT = process.env.PINATA_JWT;
 const WALLET_PRIVATE_KEY = process.env.WALLET_PRIVATE_KEY;
 const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS;
