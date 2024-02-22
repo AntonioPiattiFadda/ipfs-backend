@@ -11,7 +11,7 @@ const { default: Web3 } = require('web3');
 const app = express();
 
 const corsOptions = {
-  origin: 'https://65d757397bb57a0008779179--mutley.netlify.app/',
+  origin: '*',
 };
 const JWT = process.env.PINATA_JWT;
 const WALLET_PRIVATE_KEY = process.env.WALLET_PRIVATE_KEY;
