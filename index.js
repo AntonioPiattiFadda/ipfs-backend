@@ -25,6 +25,11 @@ const contractABI = JSON.parse(
 );
 const contract = new web3.eth.Contract(contractABI, CONTRACT_ADDRESS);
 console.log('ABI', contractABI);
+
+app.get('/', (req, res) => {
+  res.send('Backend loaded');
+});
+
 app.post('/upload', upload.single('file'), async (req, res) => {
   try {
     const allowedExtensions = ['png', 'jpg', 'jpeg', 'mp3', 'mp4'];
